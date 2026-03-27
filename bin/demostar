@@ -7,35 +7,48 @@ STATE_FILE="$DEMOSTAR_DIR/.demo-state"
 # 开启演示模式
 start_demo() {
   echo "⭐ 启动演示模式..."
+  mkdir -p "$DEMOSTAR_DIR"
+  > "$STATE_FILE"
 
-  # 保存当前字体大小（iTerm2）
-  if [ -f "$HOME/Library/Preferences/com.googlecode.iterm2.plist" ]; then
-    echo "  💾 保存当前字体设置"
-    defaults read com.googlecode.iterm2 "Normal Font" > "$DEMOSTAR_DIR/.font-backup" 2>/dev/null || echo "14" > "$DEMOSTAR_DIR/.font-backup"
+  # 保存当前状态
+  echo "  💾 保存当前设置"
+  dnd_status=$(defaults -currentHost read ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb 2>/dev/null || echo "0")
+  echo "dnd=$dnd_status" >> "$STATE_FILE"
 
-    echo "  🔤 放大终端字体"
-    osascript -e 'tell application "iTerm2" to tell current session of current window to set font size to 18' 2>/dev/null
-  fi
+  desktop_status=$(defaults read com.apple.finder CreateDesktop 2>/dev/null || echo "1")
+  echo "desktop=$desktop_status" >> "$STATE_FILE"
+
+  keycastr_running=0
+  pgrep -x "KeyCastr" > /dev/null && keycastr_running=1
+  echo "keycastr=$keycastr_running" >> "$STATE_FILE"
+
+  font_size=$(osascript -e 'tell application "iTerm2" to tell current session of current window to get font size' 2>/dev/null || echo "14")
+  echo "font=$font_size" >> "$STATE_FILE"
+
+  # 放大终端字体
+  echo "  🔤 放大终端字体"
+  osascript -e 'tell application "iTerm2" to tell current session of current window to set font size to 18' 2>/dev/null
 
   # 开启勿扰模式
-  echo "  🔕 开启勿扰模式"
-  defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean true
-  defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturbDate -date "$(date -u +"%Y-%m-%d %H:%M:%S +0000")"
-  killall NotificationCenter
+  if [ "$dnd_status" != "1" ]; then
+    echo "  🔕 开启勿扰模式"
+    defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean true
+    defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturbDate -date "$(date -u +"%Y-%m-%d %H:%M:%S +0000")"
+    killall NotificationCenter 2>/dev/null
+  fi
 
   # 隐藏桌面图标
-  echo "  🖥️  隐藏桌面图标"
-  defaults write com.apple.finder CreateDesktop -bool false
-  killall Finder
+  if [ "$desktop_status" != "0" ]; then
+    echo "  🖥️  隐藏桌面图标"
+    defaults write com.apple.finder CreateDesktop -bool false
+    killall Finder 2>/dev/null
+  fi
 
   # 启动 KeyCastr
-  if command -v open &> /dev/null; then
+  if [ "$keycastr_running" = "0" ]; then
     echo "  ⌨️  启动 KeyCastr"
     open -a KeyCastr 2>/dev/null || echo "  ⚠️  KeyCastr 未安装"
   fi
-
-  # 记录状态
-  echo "demo" > "$STATE_FILE"
 
   echo "✅ 演示模式已启动"
 }
@@ -44,44 +57,46 @@ start_demo() {
 stop_demo() {
   echo "⭐ 关闭演示模式..."
 
-  # 恢复终端字体
-  if [ -f "$DEMOSTAR_DIR/.font-backup" ]; then
-    echo "  🔤 恢复终端字体"
-    osascript -e 'tell application "iTerm2" to tell current session of current window to set font size to 14' 2>/dev/null
-    rm -f "$DEMOSTAR_DIR/.font-backup"
+  if [ ! -f "$STATE_FILE" ]; then
+    echo "❌ 未找到状态文件，无法恢复"
+    exit 1
   fi
 
-  # 关闭勿扰模式
-  echo "  🔔 关闭勿扰模式"
-  defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false
-  killall NotificationCenter
+  # 读取保存的状态
+  source "$STATE_FILE"
 
-  # 显示桌面图标
-  echo "  🖥️  显示桌面图标"
-  defaults write com.apple.finder CreateDesktop -bool true
-  killall Finder
+  # 恢复终端字体
+  echo "  🔤 恢复终端字体"
+  osascript -e "tell application \"iTerm2\" to tell current session of current window to set font size to $font" 2>/dev/null
 
-  # 关闭 KeyCastr
-  echo "  ⌨️  关闭 KeyCastr"
-  killall KeyCastr 2>/dev/null
+  # 恢复勿扰模式
+  if [ "$dnd" = "0" ]; then
+    echo "  🔔 关闭勿扰模式"
+    defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false
+    killall NotificationCenter 2>/dev/null
+  fi
 
-  # 清除状态
+  # 恢复桌面图标
+  if [ "$desktop" = "1" ]; then
+    echo "  🖥️  显示桌面图标"
+    defaults write com.apple.finder CreateDesktop -bool true
+    killall Finder 2>/dev/null
+  fi
+
+  # 恢复 KeyCastr 状态
+  if [ "$keycastr" = "0" ]; then
+    echo "  ⌨️  关闭 KeyCastr"
+    killall KeyCastr 2>/dev/null
+  fi
+
   rm -f "$STATE_FILE"
-
   echo "✅ 演示模式已关闭"
 }
 
 # 主逻辑
 case "$1" in
-  start)
-    start_demo
-    ;;
-  stop)
-    stop_demo
-    ;;
-  *)
-    echo "用法: demostar {start|stop}"
-    exit 1
-    ;;
+  start) start_demo ;;
+  stop) stop_demo ;;
+  *) echo "用法: demostar {start|stop}"; exit 1 ;;
 esac
 
