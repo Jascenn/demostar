@@ -1,0 +1,87 @@
+#!/bin/bash
+# DemoStar 主命令
+
+DEMOSTAR_DIR="$HOME/.demostar"
+STATE_FILE="$DEMOSTAR_DIR/.demo-state"
+
+# 开启演示模式
+start_demo() {
+  echo "⭐ 启动演示模式..."
+
+  # 保存当前字体大小（iTerm2）
+  if [ -f "$HOME/Library/Preferences/com.googlecode.iterm2.plist" ]; then
+    echo "  💾 保存当前字体设置"
+    defaults read com.googlecode.iterm2 "Normal Font" > "$DEMOSTAR_DIR/.font-backup" 2>/dev/null || echo "14" > "$DEMOSTAR_DIR/.font-backup"
+
+    echo "  🔤 放大终端字体"
+    osascript -e 'tell application "iTerm2" to tell current session of current window to set font size to 18' 2>/dev/null
+  fi
+
+  # 开启勿扰模式
+  echo "  🔕 开启勿扰模式"
+  defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean true
+  defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturbDate -date "$(date -u +"%Y-%m-%d %H:%M:%S +0000")"
+  killall NotificationCenter
+
+  # 隐藏桌面图标
+  echo "  🖥️  隐藏桌面图标"
+  defaults write com.apple.finder CreateDesktop -bool false
+  killall Finder
+
+  # 启动 KeyCastr
+  if command -v open &> /dev/null; then
+    echo "  ⌨️  启动 KeyCastr"
+    open -a KeyCastr 2>/dev/null || echo "  ⚠️  KeyCastr 未安装"
+  fi
+
+  # 记录状态
+  echo "demo" > "$STATE_FILE"
+
+  echo "✅ 演示模式已启动"
+}
+
+# 关闭演示模式
+stop_demo() {
+  echo "⭐ 关闭演示模式..."
+
+  # 恢复终端字体
+  if [ -f "$DEMOSTAR_DIR/.font-backup" ]; then
+    echo "  🔤 恢复终端字体"
+    osascript -e 'tell application "iTerm2" to tell current session of current window to set font size to 14' 2>/dev/null
+    rm -f "$DEMOSTAR_DIR/.font-backup"
+  fi
+
+  # 关闭勿扰模式
+  echo "  🔔 关闭勿扰模式"
+  defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false
+  killall NotificationCenter
+
+  # 显示桌面图标
+  echo "  🖥️  显示桌面图标"
+  defaults write com.apple.finder CreateDesktop -bool true
+  killall Finder
+
+  # 关闭 KeyCastr
+  echo "  ⌨️  关闭 KeyCastr"
+  killall KeyCastr 2>/dev/null
+
+  # 清除状态
+  rm -f "$STATE_FILE"
+
+  echo "✅ 演示模式已关闭"
+}
+
+# 主逻辑
+case "$1" in
+  start)
+    start_demo
+    ;;
+  stop)
+    stop_demo
+    ;;
+  *)
+    echo "用法: demostar {start|stop}"
+    exit 1
+    ;;
+esac
+
