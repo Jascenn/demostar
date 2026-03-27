@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DemoStar - 演示模式一键配置</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #fff;
+      color: #1a1a1a;
+      line-height: 1.6;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 80px 24px 60px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: #f5f5f5;
+      color: #666;
+      font-size: 13px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: 52px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span {
+      color: #f5a623;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: #666;
+      max-width: 480px;
+      margin: 0 auto 36px;
+    }
+
+    .install-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #1a1a1a;
+      color: #fff;
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-family: "SF Mono", monospace;
+      font-size: 14px;
+    }
+
+    .install-block .prompt { color: #666; }
+    .install-block .cmd { color: #7dd3fc; }
+
+    /* Features */
+    .features {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 72px 24px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      padding: 28px;
+      border: 1px solid #f0f0f0;
+      border-radius: 12px;
+    }
+
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    .feature-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Demo */
+    .demo {
+      background: #fafafa;
+      border-top: 1px solid #f0f0f0;
+      border-bottom: 1px solid #f0f0f0;
+      padding: 72px 24px;
+    }
+
+    .demo-inner {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .demo h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .terminal {
+      background: #1a1a1a;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .terminal-bar {
+      background: #2d2d2d;
+      padding: 10px 16px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #28ca41; }
+
+    .terminal-body {
+      padding: 20px 24px;
+      font-family: "SF Mono", monospace;
+      font-size: 13px;
+      line-height: 2;
+    }
+
+    .t-prompt { color: #666; }
+    .t-cmd { color: #7dd3fc; }
+    .t-ok { color: #34d399; }
+    .t-info { color: #a78bfa; }
+    .t-masked { color: #fbbf24; }
+    .t-dim { color: #555; }
+
+    /* Steps */
+    .steps {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 72px 24px;
+    }
+
+    .steps h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .step {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      background: #1a1a1a;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .step p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .code {
+      background: #f5f5f5;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-family: "SF Mono", monospace;
+      font-size: 13px;
+      color: #1a1a1a;
+    }
+
+    /* Sponsor */
+    .sponsor {
+      text-align: center;
+      padding: 48px 24px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .sponsor p {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 12px;
+    }
+
+    .sponsor a {
+      color: #1a1a1a;
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 13px;
+      color: #999;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    footer a { color: #999; text-decoration: none; }
+    footer a:hover { color: #1a1a1a; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 36px; }
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">macOS · 开源 · 零依赖</div>
+    <h1>Demo<span>★</span>Star</h1>
+    <p>技术演示神器，一键启动演示模式，自动隐藏敏感信息</p>
+    <div class="install-block">
+      <span class="prompt">$</span>
+      <span class="cmd">curl -fsSL https://raw.githubusercontent.com/Jascenn/demostar/main/install.sh | bash</span>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="section-title">功能特性</div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>自动数据脱敏</h3>
+        <p>自动识别并隐藏 API Key、Token、密码等敏感信息，cat / grep / less 无缝集成</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⌨️</div>
+        <h3>键盘按键显示</h3>
+        <p>集成 KeyCastr，实时显示按键操作，演示时让观众看清每一步</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔕</div>
+        <h3>勿扰模式</h3>
+        <p>自动开启勿扰、隐藏桌面图标，告别演示途中的尴尬弹窗</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔤</div>
+        <h3>终端字体放大</h3>
+        <p>演示时自动放大终端字体，让远处的观众也能看清命令和输出</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💾</div>
+        <h3>状态自动恢复</h3>
+        <p>记录演示前的所有设置，关闭演示模式后精准恢复，不改变你的日常环境</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>零依赖安装</h3>
+        <p>纯 Shell 实现，无需 Python / Node.js，一行命令搞定，30 秒完成配置</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo -->
+  <section class="demo">
+    <div class="demo-inner">
+      <h2>效果演示</h2>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+        <div class="terminal-body">
+          <div><span class="t-prompt">$ </span><span class="t-cmd">demostar start</span></div>
+          <div><span class="t-info">⭐ 启动演示模式...</span></div>
+          <div><span class="t-dim">  💾 保存当前设置</span></div>
+          <div><span class="t-dim">  🔤 放大终端字体</span></div>
+          <div><span class="t-dim">  🔕 开启勿扰模式</span></div>
+          <div><span class="t-dim">  🖥️  隐藏桌面图标</span></div>
+          <div><span class="t-dim">  ⌨️  启动 KeyCastr</span></div>
+          <div><span class="t-ok">✅ 演示模式已启动</span></div>
+          <div>&nbsp;</div>
+          <div><span class="t-prompt">$ </span><span class="t-cmd">cat .env</span></div>
+          <div>ANTHROPIC_API_KEY=<span class="t-masked">sk-a************************************************ABCD</span></div>
+          <div>OPENAI_API_KEY=<span class="t-masked">sk-p*********************************************WXYZ</span></div>
+          <div>DATABASE_URL=postgresql://user:<span class="t-masked">pass******7890</span>@localhost:5432/db</div>
+          <div>&nbsp;</div>
+          <div><span class="t-prompt">$ </span><span class="t-cmd">demostar stop</span></div>
+          <div><span class="t-ok">✅ 演示模式已关闭，已恢复原始设置</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Steps -->
+  <section class="steps">
+    <h2>快速开始</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <h3>一键安装</h3>
+        <p>运行安装脚本，自动完成所有配置</p>
+        <div class="code">curl -fsSL https://raw.githubusercontent.com/Jascenn/demostar/main/install.sh | bash</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <h3>重新加载 Shell</h3>
+        <p>使配置生效</p>
+        <div class="code">source ~/.zshrc</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <h3>开始演示</h3>
+        <p>一键启动所有演示功能</p>
+        <div class="code">demostar start</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div>
+        <h3>演示结束</h3>
+        <p>一键关闭，自动恢复所有设置</p>
+        <div class="code">demostar stop</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sponsor -->
+  <section class="sponsor">
+    <p>本项目由以下赞助商支持</p>
+    <a href="https://lioncc.ai" target="_blank">LionCC API</a>
+    <p style="margin-top: 8px; font-size: 12px;">稳定、高性价比的 AI 模型 API 服务，支持 Claude、GPT-4、Gemini 等主流模型</p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      <a href="https://github.com/Jascenn/demostar" target="_blank">GitHub</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/Jascenn/demostar/blob/main/LICENSE" target="_blank">MIT License</a>
+      &nbsp;·&nbsp;
+      Made by <a href="https://github.com/Jascenn" target="_blank">Jascenn</a>
+    </p>
+  </footer>
+
+</body>
+</html>
