@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-03-27
+
+### Added
+- `demostar status` 命令查看当前演示模式状态
+- 直接执行 `demostar` 显示完整用法
+
+### Fixed
+- 数据脱敏现在绑定演示模式，stop 后自动恢复正常显示
+- 修复安装脚本 Shell 环境检测（优先 zsh）
+- stop 时只恢复被改变的设置，不影响原本状态
+
+---
+
 ## [1.0.0] - 2026-03-27
 
 ### Added

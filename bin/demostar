@@ -93,10 +93,27 @@ stop_demo() {
   echo "✅ 演示模式已关闭"
 }
 
+# 查看当前状态
+status_demo() {
+  if [ -f "$STATE_FILE" ]; then
+    echo "⭐ 演示模式：开启中"
+  else
+    echo "⭐ 演示模式：已关闭"
+  fi
+}
+
 # 主逻辑
 case "$1" in
-  start) start_demo ;;
-  stop) stop_demo ;;
-  *) echo "用法: demostar {start|stop}"; exit 1 ;;
+  start)  start_demo ;;
+  stop)   stop_demo ;;
+  status) status_demo ;;
+  *)
+    echo "DemoStar - 演示模式管理工具"
+    echo ""
+    echo "用法:"
+    echo "  demostar start   启动演示模式"
+    echo "  demostar stop    关闭演示模式"
+    echo "  demostar status  查看当前状态"
+    ;;
 esac
 

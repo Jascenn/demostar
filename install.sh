@@ -101,9 +101,12 @@ fi
 # 配置 Shell 环境
 echo ""
 echo "4️⃣ 配置 Shell 环境..."
-SHELL_RC="$HOME/.zshrc"
-if [ -f "$HOME/.bashrc" ]; then
+if [ -n "$ZSH_VERSION" ] || [ "$SHELL" = "/bin/zsh" ]; then
+  SHELL_RC="$HOME/.zshrc"
+elif [ -f "$HOME/.bashrc" ]; then
   SHELL_RC="$HOME/.bashrc"
+else
+  SHELL_RC="$HOME/.zshrc"
 fi
 
 if ! grep -q "demostar" "$SHELL_RC"; then
