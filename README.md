@@ -2,6 +2,8 @@
 
 > 演示模式一键配置 - 让你的技术演示更专业、更安全
 
+🌐 [在线演示](https://demostar.lingyi.tools)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/Jascenn/demostar)
 
