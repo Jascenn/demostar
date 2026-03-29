@@ -3,6 +3,10 @@
 
 DEMOSTAR_DIR="$HOME/.demostar"
 STATE_FILE="$DEMOSTAR_DIR/.demo-state"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# 加载 DND helper
+source "$SCRIPT_DIR/lib/dnd-helper.sh"
 
 # 开启演示模式
 start_demo() {
@@ -12,7 +16,7 @@ start_demo() {
 
   # 保存当前状态
   echo "  💾 保存当前设置"
-  dnd_status=$(defaults -currentHost read ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb 2>/dev/null || echo "0")
+  dnd_status=$(get_dnd_status)
   echo "dnd=$dnd_status" >> "$STATE_FILE"
 
   desktop_status=$(defaults read com.apple.finder CreateDesktop 2>/dev/null || echo "1")
@@ -32,9 +36,7 @@ start_demo() {
   # 开启勿扰模式
   if [ "$dnd_status" != "1" ]; then
     echo "  🔕 开启勿扰模式"
-    defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean true
-    defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturbDate -date "$(date -u +"%Y-%m-%d %H:%M:%S +0000")"
-    killall NotificationCenter 2>/dev/null
+    set_dnd 1
   fi
 
   # 隐藏桌面图标
@@ -72,8 +74,7 @@ stop_demo() {
   # 恢复勿扰模式
   if [ "$dnd" = "0" ]; then
     echo "  🔔 关闭勿扰模式"
-    defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false
-    killall NotificationCenter 2>/dev/null
+    set_dnd 0
   fi
 
   # 恢复桌面图标
