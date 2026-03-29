@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-03-29
+
+### Added
+- 跨平台支持：自动检测操作系统，非 macOS 系统也能使用
+- 响应式网站设计：支持手机、平板等多端访问
+
+### Changed
+- 优化功能检测：只在支持的平台上启用特定功能
+- 改进移动端布局：安装命令自动换行，避免溢出
+
+---
+
 ## [1.2.0] - 2026-03-29
 
 ### Fixed
