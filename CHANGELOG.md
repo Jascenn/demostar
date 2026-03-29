@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-03-29
+
+### Fixed
+- 修复现代 macOS (12+) 勿扰模式检测失效问题
+- 使用 Focus Assertions.json 替代废弃的 notificationcenterui
+- 通过 AppleScript 控制 Control Center 实现 DND 切换
+- 正确保存和恢复演示前的 DND 状态
+
+### Added
+- 新增 `lib/dnd-helper.sh` 支持现代 macOS Focus 模式
+
+---
+
 ## [1.1.0] - 2026-03-27
 
 ### Added
