@@ -5,8 +5,14 @@ DEMOSTAR_DIR="$HOME/.demostar"
 STATE_FILE="$DEMOSTAR_DIR/.demo-state"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# 加载 DND helper
-source "$SCRIPT_DIR/lib/dnd-helper.sh"
+# 检测系统类型
+IS_MACOS=false
+[[ "$(uname)" == "Darwin" ]] && IS_MACOS=true
+
+# 加载 DND helper (仅 macOS)
+if $IS_MACOS && [ -f "$SCRIPT_DIR/lib/dnd-helper.sh" ]; then
+  source "$SCRIPT_DIR/lib/dnd-helper.sh"
+fi
 
 # 开启演示模式
 start_demo() {
@@ -14,42 +20,46 @@ start_demo() {
   mkdir -p "$DEMOSTAR_DIR"
   > "$STATE_FILE"
 
-  # 保存当前状态
   echo "  💾 保存当前设置"
-  dnd_status=$(get_dnd_status)
-  echo "dnd=$dnd_status" >> "$STATE_FILE"
 
-  desktop_status=$(defaults read com.apple.finder CreateDesktop 2>/dev/null || echo "1")
-  echo "desktop=$desktop_status" >> "$STATE_FILE"
-
-  keycastr_running=0
-  pgrep -x "KeyCastr" > /dev/null && keycastr_running=1
-  echo "keycastr=$keycastr_running" >> "$STATE_FILE"
-
-  font_size=$(osascript -e 'tell application "iTerm2" to tell current session of current window to get font size' 2>/dev/null || echo "14")
-  echo "font=$font_size" >> "$STATE_FILE"
-
-  # 放大终端字体
-  echo "  🔤 放大终端字体"
-  osascript -e 'tell application "iTerm2" to tell current session of current window to set font size to 18' 2>/dev/null
-
-  # 开启勿扰模式
-  if [ "$dnd_status" != "1" ]; then
-    echo "  🔕 开启勿扰模式"
-    set_dnd 1
+  # DND (仅 macOS)
+  if $IS_MACOS && command -v get_dnd_status &>/dev/null; then
+    dnd_status=$(get_dnd_status 2>/dev/null)
+    echo "dnd=$dnd_status" >> "$STATE_FILE"
+    if [ "$dnd_status" != "1" ]; then
+      echo "  🔕 开启勿扰模式"
+      set_dnd 1 2>/dev/null
+    fi
   fi
 
-  # 隐藏桌面图标
-  if [ "$desktop_status" != "0" ]; then
-    echo "  🖥️  隐藏桌面图标"
-    defaults write com.apple.finder CreateDesktop -bool false
-    killall Finder 2>/dev/null
+  # 桌面图标 (仅 macOS)
+  if $IS_MACOS; then
+    desktop_status=$(defaults read com.apple.finder CreateDesktop 2>/dev/null || echo "1")
+    echo "desktop=$desktop_status" >> "$STATE_FILE"
+    if [ "$desktop_status" != "0" ]; then
+      echo "  🖥️  隐藏桌面图标"
+      defaults write com.apple.finder CreateDesktop -bool false
+      killall Finder 2>/dev/null
+    fi
   fi
 
-  # 启动 KeyCastr
-  if [ "$keycastr_running" = "0" ]; then
-    echo "  ⌨️  启动 KeyCastr"
-    open -a KeyCastr 2>/dev/null || echo "  ⚠️  KeyCastr 未安装"
+  # KeyCastr (仅 macOS)
+  if $IS_MACOS; then
+    keycastr_running=0
+    pgrep -x "KeyCastr" > /dev/null && keycastr_running=1
+    echo "keycastr=$keycastr_running" >> "$STATE_FILE"
+    if [ "$keycastr_running" = "0" ]; then
+      echo "  ⌨️  启动 KeyCastr"
+      open -a KeyCastr 2>/dev/null || echo "  ⚠️  KeyCastr 未安装"
+    fi
+  fi
+
+  # 终端字体 (仅 macOS + iTerm2)
+  if $IS_MACOS && osascript -e 'application "iTerm2" is running' 2>/dev/null; then
+    font_size=$(osascript -e 'tell application "iTerm2" to tell current session of current window to get font size' 2>/dev/null || echo "14")
+    echo "font=$font_size" >> "$STATE_FILE"
+    echo "  🔤 放大终端字体"
+    osascript -e 'tell application "iTerm2" to tell current session of current window to set font size to 18' 2>/dev/null
   fi
 
   echo "✅ 演示模式已启动"
@@ -64,30 +74,37 @@ stop_demo() {
     exit 1
   fi
 
-  # 读取保存的状态
   source "$STATE_FILE"
 
-  # 恢复终端字体
-  echo "  🔤 恢复终端字体"
-  osascript -e "tell application \"iTerm2\" to tell current session of current window to set font size to $font" 2>/dev/null
-
-  # 恢复勿扰模式
-  if [ "$dnd" = "0" ]; then
-    echo "  🔔 关闭勿扰模式"
-    set_dnd 0
+  # 恢复终端字体 (仅 macOS + iTerm2)
+  if $IS_MACOS && [ -n "$font" ] && osascript -e 'application "iTerm2" is running' 2>/dev/null; then
+    echo "  🔤 恢复终端字体"
+    osascript -e "tell application \"iTerm2\" to tell current session of current window to set font size to $font" 2>/dev/null
   fi
 
-  # 恢复桌面图标
-  if [ "$desktop" = "1" ]; then
-    echo "  🖥️  显示桌面图标"
-    defaults write com.apple.finder CreateDesktop -bool true
-    killall Finder 2>/dev/null
+  # 恢复 DND (仅 macOS)
+  if $IS_MACOS && [ -n "$dnd" ] && command -v set_dnd &>/dev/null; then
+    if [ "$dnd" = "0" ]; then
+      echo "  🔔 关闭勿扰模式"
+      set_dnd 0
+    fi
   fi
 
-  # 恢复 KeyCastr 状态
-  if [ "$keycastr" = "0" ]; then
-    echo "  ⌨️  关闭 KeyCastr"
-    killall KeyCastr 2>/dev/null
+  # 恢复桌面图标 (仅 macOS)
+  if $IS_MACOS && [ -n "$desktop" ]; then
+    if [ "$desktop" = "1" ]; then
+      echo "  🖥️  显示桌面图标"
+      defaults write com.apple.finder CreateDesktop -bool true
+      killall Finder 2>/dev/null
+    fi
+  fi
+
+  # 恢复 KeyCastr (仅 macOS)
+  if $IS_MACOS && [ -n "$keycastr" ]; then
+    if [ "$keycastr" = "0" ]; then
+      echo "  ⌨️  关闭 KeyCastr"
+      killall KeyCastr 2>/dev/null
+    fi
   fi
 
   rm -f "$STATE_FILE"
@@ -117,4 +134,3 @@ case "$1" in
     echo "  demostar status  查看当前状态"
     ;;
 esac
-
