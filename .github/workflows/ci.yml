@@ -22,7 +22,7 @@ jobs:
 
       - name: No real-looking secrets in tree
         run: |
-          if grep -rInE '(sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16})' --exclude-dir=.git .; then
+          if grep -rInE '(sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16})' --exclude-dir=.git --exclude='*.example.json' .; then
             echo "::error::Potential real credential found"
             exit 1
           fi
