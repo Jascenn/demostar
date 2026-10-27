@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell syntax check
+        run: |
+          fail=0
+          for f in bin/* lib/*.sh install.sh; do
+            [ -f "$f" ] || continue
+            bash -n "$f" || fail=1
+          done
+          exit $fail
+
+      - name: No real-looking secrets in tree
+        run: |
+          if grep -rInE '(sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16})' --exclude-dir=.git --exclude='*.example.json' .; then
+            echo "::error::Potential real credential found"
+            exit 1
+          fi

@@ -1,9 +1,9 @@
 {
-  "apiKey": "sk-ant-example-not-a-real-key",
+  "apiKey": "sk-example-api-key-placeholder",
   "models": {
     "primary": {
-      "apiKey": "sk-example-not-a-real-key",
-      "token": "ghp_example0000000000000000000000000000"
+      "apiKey": "sk-example-model-key-placeholder",
+      "token": "gh-example-token-placeholder"
     }
   },
   "channels": {
