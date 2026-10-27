@@ -72,21 +72,21 @@ demostar stop
 
 ### ENV 文件
 ```bash
-ANTHROPIC_API_KEY=sk-ant1234567890abcdefghijklmnopqrstuvwxyz1234567890ABCD
+ANTHROPIC_API_KEY=sk-ant-example-not-a-real-key
 # 脱敏后：sk-a************************************************ABCD
 ```
 
 ### JSON 文件
 ```json
 {
-  "apiKey": "sk-proj1234567890abcdefghijklmnopqrstuvwxyz123456WXYZ"
+  "apiKey": "sk-example-not-a-real-key"
   // 脱敏后："sk-p*********************************************WXYZ"
 }
 ```
 
 ### DATABASE_URL
 ```bash
-DATABASE_URL=postgresql://user:pass1234567890@localhost:5432/db
+DATABASE_URL=postgresql://user:example-password@localhost:5432/db
 # 脱敏后：postgresql://user:pass******7890@localhost:5432/db
 ```
 
